@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HYPHEN - Notes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 20px;
+            background: url('https://images.unsplash.com/photo-1578450671530-5b6a7c9f32a8?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center;
+            background-size: cover;
+            animation: backgroundZoom 20s ease-in-out infinite;
+        }
+
+        .notes-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .logo h1 {
+            color: #2c3e50;
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'Bradley Hand ITC', sans-serif;
+        }
+
+        .logo span {
+            color: #3498db;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            animation: slideInLeft 0.5s ease-out;
+        }
+
+        .note-form {
+            margin-bottom: 30px;
+        }
+
+        .note-form textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            resize: vertical;
+            margin-bottom: 10px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .note-form textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+
+ 
+        .media-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #2bf597;
+            border: none;
+            border-radius: 5px;
+            color: rgb(248, 21, 21);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            margin-bottom: 10px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .media-btn.active {
+            animation: pulse 1.5s infinite;
+        }
+
+        .media-btn:hover {
+            background: #2bf597;
+            transform: scale(1.05);
+        }
+
+        .media-btn.shake {
+            animation: shake 0.3s ease-in-out;
+        }
+        .note-form input[type="file"] {
+            display: none;
+        }
+
+        .add-note-btn {
+            padding: 10px 20px;
+            background: #2bf597;
+            border: none;
+            border-radius: 5px;
+            color: rgb(247, 6, 6);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        .add-note-btn.active {
+            animation: pulse 1.5s infinite;
+        }
+
+        .add-note-btn:hover {
+            background: #2bf597;
+            transform: scale(1.05);
+        }
+
+
+        .back-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: #7f8c8d;
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            z-index: 1000;
+        }
+
+        .back-btn:hover {
+            background: #6c757d;
+            transform: translateY(-3px);
+        }
+
+        .share-btn {
+            position: absolute;
+            top: 15px;
+            right: 80px;
+            background: #3498db;
+            border: none;
+            border-radius: 50px;
+            color: white;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        .share-btn:hover {
+            background: #2980b9;
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-bottom: 10px;
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .notes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .note {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+            position: relative;
+            transition: transform 0.3s, border-color 0.3s;
+            animation: slideInDown 0.5s ease-out;
+        }
+
+        .note:hover {
+            transform: scale(1.02);
+            border-left-color: #e74c3c;
+        }
+
+        .note.leaving {
+            animation: fadeOutScale 0.3s ease-out forwards;
+        }
+
+        .note-content {
+            color: #2c3e50;
+            font-size: 16px;
+            white-space: pre-wrap;
+            margin-bottom: 10px;
+        }
+
+        .note-media {
+            margin-top: 10px;
+            max-width: 100%;
+            border-radius: 5px;
+        }
+
+        .note-media img,
+        .note-media video {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+
+        .note-media a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .note-media a:hover {
+            text-decoration: underline;
+        }
+
+        .note-timestamp {
+            color: #7f8c8d;
+            font-size: 12px;
+            margin-top: 10px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none;
+            z-index: 1001;
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        @media (max-width: 480px) {
+            .notes-container {
+                padding: 20px;
+            }
+
+            .add-note-btn, .media-btn {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .back-btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            .share-btn {
+                right: 70px;
+                padding: 4px 8px;
+                font-size: 12px;
+            }
+
+            .delete-btn {
+                padding: 4px 8px;
+                font-size: 12px;
+            }
+
+            .toast {
+                bottom: 70px;
+                right: 10px;
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideInDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeOutScale {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.8); }
+        }
+
+        @keyframes fadeInUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes backgroundZoom {
+            0% { background-size: 150%; }
+            50% { background-size: 160%; }
+            100% { background-size: 150%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="notes-container">
+        <div class="logo">
+            <h1>HYPHEN<span>-</span></h1>
+        </div>
+        <h2>My Notes</h2>
+        <div class="note-form">
+            <textarea id="noteInput" placeholder="Write your note here..."></textarea>
+            <label for="mediaInput" class="media-btn">Upload Media</label>
+            <input type="file" id="mediaInput" accept="image/*,video/*">
+            <div id="mediaError" class="error"></div>
+            <button class="add-note-btn" onclick="addNote()">Add Note</button>
+        </div>
+        <div class="notes-list" id="notesList">
+        </div>
+    </div>
+    <button class="back-btn" onclick="goToLogin()">Back to Login</button>
+
+    <script>
+        // Get current user
+        const userEmail = sessionStorage.getItem('userEmail');
+        if (!userEmail) {
+            showToast('Please log in to view notes');
+            setTimeout(() => window.location.href = 'index.html', 1000);
+        }
+
+        // Sanitize email for storage key (replace invalid characters)
+        const userKey = 'notes_' + userEmail?.replace(/[@.]/g, '_');
+
+        // IndexedDB setup
+        let db;
+        const dbRequest = indexedDB.open('HyphenNotesDB', 1);
+
+        dbRequest.onupgradeneeded = function(event) {
+            db = event.target.result;
+            if (userEmail) {
+                db.createObjectStore('media_' + userEmail.replace(/[@.]/g, '_'), { keyPath: 'id', autoIncrement: true });
+            }
+        };
+
+        dbRequest.onsuccess = function(event) {
+            db = event.target.result;
+            loadNotes();
+        };
+
+        dbRequest.onerror = function() {
+            showToast('Error initializing storage');
+        };
+
+        function showToast(message) {
+            let toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            toast.style.display = 'block';
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function updateAddButtonState() {
+            const noteInput = document.getElementById('noteInput');
+            const mediaInput = document.getElementById('mediaInput');
+            const mediaButton = document.querySelector('.media-btn');
+            const addButton = document.querySelector('.add-note-btn');
+            if (noteInput.value.trim() || mediaInput.files.length > 0) {
+                addButton.classList.add('active');
+            } else {
+                addButton.classList.remove('active');
+            }
+            if (mediaInput.files.length > 0) {
+                mediaButton.classList.add('active');
+            } else {
+                mediaButton.classList.remove('active');
+            }
+        }
+
+        async function loadNotes() {
+            if (!userEmail) return;
+            const notes = JSON.parse(localStorage.getItem(userKey)) || [];
+            const notesList = document.getElementById('notesList');
+            notesList.innerHTML = '';
+            for (let i = 0; i < notes.length; i++) {
+                const note = notes[i];
+                const noteElement = document.createElement('div');
+                noteElement.className = 'note';
+                let mediaHTML = '';
+                if (note.mediaId) {
+                    const media = await getMedia(note.mediaId);
+                    if (media) {
+                        if (media.type.startsWith('image/')) {
+                            mediaHTML = `<div class="note-media"><img src="${media.data}" alt="Note Image"></div>`;
+                        } else if (media.type.startsWith('video/')) {
+                            mediaHTML = `<div class="note-media"><video controls src="${media.data}"></video></div>`;
+                        }
+                    }
+                }
+                noteElement.innerHTML = `
+                    <div class="note-content">${note.content}</div>
+                    ${mediaHTML}
+                    <div class="note-timestamp">Created: ${note.timestamp}</div>
+                    <button class="share-btn" onclick="shareNote(${i})">Share</button>
+                    <button class="delete-btn" onclick="deleteNote(${i})">Delete</button>
+                `;
+                notesList.appendChild(noteElement);
+            }
+        }
+
+        function getMedia(id) {
+            return new Promise((resolve) => {
+                const transaction = db.transaction(['media_' + userEmail.replace(/[@.]/g, '_')], 'readonly');
+                const store = transaction.objectStore('media_' + userEmail.replace(/[@.]/g, '_'));
+                const request = store.get(id);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => resolve(null);
+            });
+        }
+
+        async function addNote() {
+            if (!userEmail) {
+                showToast('Please log in to add notes');
+                return;
+            }
+
+            const noteInput = document.getElementById('noteInput');
+            const mediaInput = document.getElementById('mediaInput');
+            const mediaButton = document.querySelector('.media-btn');
+            const content = noteInput.value.trim();
+            const file = mediaInput.files[0];
+
+            if (!content && !file) {
+                showToast('Please enter a note or select a media file');
+                noteInput.classList.add('shake');
+                mediaButton.classList.add('shake');
+                setTimeout(() => {
+                    noteInput.classList.remove('shake');
+                    mediaButton.classList.remove('shake');
+                }, 300);
+                return;
+            }
+
+            const notes = JSON.parse(localStorage.getItem(userKey)) || [];
+            const timestamp = new Date().toLocaleString();
+            const note = { content, timestamp, mediaId: null };
+
+            if (file) {
+                const maxSize = 10 * 1024 * 1024; // 10MB
+                const allowedTypes = ['image/png', 'image/jpeg', 'video/mp4', 'video/webm'];
+
+                if (file.size > maxSize) {
+                    showToast('File size exceeds 10MB limit');
+                    mediaButton.classList.add('shake');
+                    setTimeout(() => mediaButton.classList.remove('shake'), 300);
+                    return;
+                }
+
+                if (!allowedTypes.includes(file.type)) {
+                    showToast('Only PNG, JPEG, MP4, and WebM files are supported');
+                    mediaButton.classList.add('shake');
+                    setTimeout(() => mediaButton.classList.remove('shake'), 300);
+                    return;
+                }
+
+                try {
+                    const mediaId = await storeMedia(file);
+                    note.mediaId = mediaId;
+                    notes.push(note);
+                    localStorage.setItem(userKey, JSON.stringify(notes));
+                    noteInput.value = '';
+                    mediaInput.value = '';
+                    updateAddButtonState();
+                    loadNotes();
+                    showToast('Note added successfully!');
+                } catch (e) {
+                    showToast('Error storing media. Try a smaller file.');
+                }
+            } else {
+                try {
+                    notes.push(note);
+                    localStorage.setItem(userKey, JSON.stringify(notes));
+                    noteInput.value = '';
+                    mediaInput.value = '';
+                    updateAddButtonState();
+                    loadNotes();
+                    showToast('Note added successfully!');
+                } catch (e) {
+                    showToast('Storage limit reached. Please delete some notes.');
+                }
+            }
+        }
+
+        function storeMedia(file) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(['media_' + userEmail.replace(/[@.]/g, '_')], 'readwrite');
+                const store = transaction.objectStore('media_' + userEmail.replace(/[@.]/g, '_'));
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const request = store.add({ type: file.type, data: event.target.result });
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(new Error('Error storing media'));
+                };
+                reader.onerror = () => reject(new Error('Error reading file'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function deleteNote(index) {
+            if (!userEmail) {
+                showToast('Please log in to delete notes');
+                return;
+            }
+
+            const notes = JSON.parse(localStorage.getItem(userKey)) || [];
+            const noteElement = document.querySelectorAll('.note')[index];
+            noteElement.classList.add('leaving');
+            setTimeout(async () => {
+                const note = notes[index];
+                if (note.mediaId) {
+                    const transaction = db.transaction(['media_' + userEmail.replace(/[@.]/g, '_')], 'readwrite');
+                    const store = transaction.objectStore('media_' + userEmail.replace(/[@.]/g, '_'));
+                    await store.delete(note.mediaId);
+                }
+                notes.splice(index, 1);
+                localStorage.setItem(userKey, JSON.stringify(notes));
+                loadNotes();
+                showToast('Note deleted successfully!');
+            }, 300); // Match animation duration
+        }
+
+        function shareNote(index) {
+            if (!userEmail) {
+                showToast('Please log in to share notes');
+                return;
+            }
+
+            const notes = JSON.parse(localStorage.getItem(userKey)) || [];
+            const note = notes[index];
+            if (!note) return;
+
+            const shareData = {
+                title: 'Note from HYPHEN',
+                text: note.content || 'Check out this note from HYPHEN!',
+                url: window.location.href
+            };
+
+            if (navigator.share) {
+                navigator.share(shareData)
+                    .then(() => showToast('Note shared successfully!'))
+                    .catch((error) => {
+                        console.error('Error sharing note:', error);
+                        showToast('Error sharing note');
+                    });
+            } else {
+                navigator.clipboard.writeText(shareData.text)
+                    .then(() => showToast('Note copied to clipboard!'))
+                    .catch((error) => {
+                        console.error('Error copying note:', error);
+                        showToast('Error copying note');
+                    });
+            }
+        }
+
+        function goToLogin() {
+            window.location.href = 'index.html';
+        }
+
+        window.onload = () => {
+            if (userEmail) {
+                updateAddButtonState();
+                document.getElementById('noteInput').addEventListener('input', updateAddButtonState);
+                document.getElementById('mediaInput').addEventListener('change', updateAddButtonState);
+            }
+        };
+    </script>
+</body>
+</html>
